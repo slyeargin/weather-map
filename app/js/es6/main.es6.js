@@ -18,33 +18,35 @@
   function getValue(){
     var zip = $('#zip').val().trim();
     getWeather(zip);
+    showMap(zip);
     $('#zip').val('');
   }
 
   function getWeather(zip){
     var url = `http://api.wunderground.com/api/259ccbf628d30983/forecast10day/q/${zip}.json?callback=?`;
     $.getJSON(url, data=>{
-      $('#graphs').append('<h2>'+zip+'</h2><div class=graph data-zip='+zip+'></div>');
+      $('#graphs').append('<div class=graph data-zip='+zip+'></div>');
       initGraph(zip);
-      data.forecast.simpleforecast.forecastday.forEach(m=>{
+      data.forecast.simpleforecast.forecastday.forEach(m=>
         charts[zip].dataProvider.push({
           date: m.date.weekday_short,
           high: m.high.fahrenheit * 1,
           low: m.low.fahrenheit * 1
-        });
-      });
+        }));
       charts[zip].validateData();
     });
-    show(zip);
   }
 
   function initGraph(zip){
     let graph = $('.graph[data-zip='+zip+']')[0];
-    console.log(graph);
     charts[zip] = AmCharts.makeChart(graph, {
       'type': 'serial',
       'theme': 'dark',
       'pathToImages': 'http://www.amcharts.com/lib/3/images/',
+      'titles': [{
+        'text': zip,
+        'size': 15
+      }],
       'legend': {
           'useGraphSettings': true
         },
@@ -90,7 +92,7 @@
   }
 
 
-  function show(zip){
+  function showMap(zip){
     let geocoder = new google.maps.Geocoder();
 
     geocoder.geocode({address: zip}, (results, status)=>{
